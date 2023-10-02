@@ -49,7 +49,7 @@ echo "Construct similarity matrices..."
 
 for network in network_1
 do
-    python src/construct_similarity_matrix.py \
+    python -W ignore src/construct_similarity_matrix.py \
         -i   $data/"$network"_edge_list.tsv \
         -o   $intermediate/"$network"/similarity_matrix.h5 \
         -bof $intermediate/"$network"/beta.txt
@@ -73,7 +73,7 @@ do
     # Preserve connectivity of the observed graph.
     for i in `seq 1 4`
     do
-        python src/permute_network.py \
+        python -W ignore src/permute_network.py \
             -i $intermediate/"$network"/edge_list_0.tsv \
             -s "$i" \
             -c \
@@ -83,7 +83,7 @@ do
     # Do not preserve connectivity of the observed graph.
     for i in `seq 5 8`
     do
-        python src/permute_network.py \
+        python -W ignore src/permute_network.py \
             -i $intermediate/"$network"/edge_list_0.tsv \
             -s "$i" \
             -o $intermediate/"$network"/edge_list_"$i".tsv
@@ -98,7 +98,7 @@ do
     do
         cp $data/"$score".tsv $intermediate/"$network"_"$score"/scores_0.tsv
 
-        python src/find_permutation_bins.py \
+        python -W ignore src/find_permutation_bins.py \
             -gsf $intermediate/"$network"_"$score"/scores_0.tsv \
             -igf $data/"$network"_index_gene.tsv \
             -elf $data/"$network"_edge_list.tsv \
@@ -107,7 +107,7 @@ do
 
         for i in `seq $num_permutations`
         do
-            python src/permute_scores.py \
+            python -W ignore src/permute_scores.py \
                 -i  $intermediate/"$network"_"$score"/scores_0.tsv \
                 -bf $intermediate/"$network"_"$score"/score_bins.tsv \
                 -s  "$i" \
@@ -130,7 +130,7 @@ do
     do
         for i in `seq 0 $num_permutations`
         do
-            python src/construct_hierarchy.py \
+            python -W ignore src/construct_hierarchy.py \
                 -smf  $intermediate/"$network"/similarity_matrix.h5 \
                 -igf  $data/"$network"_index_gene.tsv \
                 -gsf  $intermediate/"$network"_"$score"/scores_"$i".tsv \
@@ -154,7 +154,7 @@ for network in network_1
 do
     for score in scores_1 scores_2
     do
-        python src/process_hierarchies.py \
+        python -W ignore src/process_hierarchies.py \
             -oelf $intermediate/"$network"_"$score"/hierarchy_edge_list_0.tsv \
             -oigf $intermediate/"$network"_"$score"/hierarchy_index_gene_0.tsv \
             -pelf $(for i in `seq $num_permutations`; do echo " $intermediate/"$network"_"$score"/hierarchy_edge_list_"$i".tsv "; done) \
@@ -174,7 +174,7 @@ done
 
 echo "Performing consensus..."
 
-python src/perform_consensus.py \
+python -W ignore src/perform_consensus.py \
     -cf  $results/clusters_network_1_scores_1.tsv $results/clusters_network_1_scores_2.tsv \
     -igf $data/network_1_index_gene.tsv $data/network_1_index_gene.tsv \
     -elf $data/network_1_edge_list.tsv $data/network_1_edge_list.tsv \
@@ -183,3 +183,10 @@ python src/perform_consensus.py \
     -t   2 \
     -cnf $results/consensus_nodes.tsv \
     -cef $results/consensus_edges.tsv
+
+################################################################################
+#
+#   Clean up.
+#
+################################################################################
+rm -rf $intermediate

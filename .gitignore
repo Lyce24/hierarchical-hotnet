@@ -1,0 +1,3 @@
+*intermediate/
+*.so
+*__pycache__
